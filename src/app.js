@@ -86,6 +86,73 @@ async function clearAllData() {
   });
 }
 
+function createLoadingBubble(sender = "assistant") {
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("mb-6", "flex", "items-start", "space-x-3");
+  wrapper.classList.add("justify-start");
+
+  const avatar = document.createElement("div");
+  avatar.classList.add(
+    "w-10",
+    "h-10",
+    "rounded-full",
+    "flex-shrink-0",
+    "flex",
+    "items-center",
+    "justify-center",
+    "font-bold",
+    "text-white"
+  );
+
+  avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+  avatar.innerHTML = ` 
+    <svg width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="60" fill="#74C1A9"/>
+      <g fill="white" transform="translate(-17, 0) scale(1.3)">
+        <path d="M60 30c-16 0-28 12-28 26s12 26 28 26 28-12 28-26-12-26-28-26zm0 48c-12.15 0-22-8.28-22-18s9.85-18 22-18 22 8.28 22 18-9.85 18-22 18z"/>
+        <circle cx="50" cy="58" r="4"/>
+        <circle cx="70" cy="58" r="4"/>
+        <path d="M52 70c2.5 2.5 13.5 2.5 16 0" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="60" cy="18" r="6" fill="white"/>
+        <line x1="60" y1="24" x2="60" y2="34" stroke="white" stroke-width="4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  `;
+
+  const bubble = document.createElement("div");
+  bubble.classList.add(
+    "p-3",
+    "rounded-lg",
+    "whitespace-pre-wrap",
+    "leading-relaxed",
+    "text-[#5C5C5C]",
+    "inline-block"
+  );
+
+  bubble.style.whiteSpace = "normal";
+  bubble.style.wordBreak = "break-word";
+  bubble.style.maxWidth = "90vw";
+
+  // 프로그레스바 스타일 (간단한 애니메이션)
+  bubble.innerHTML = `
+    <div style="
+      width: 24px;
+      height: 24px;
+      border: 3px solid #ccc;
+      border-top-color: #74C1A9;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: block;
+      white-space: normal;
+    "></div>
+  `;
+
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(bubble);
+  return wrapper;
+}
+
 function createMessageBubble(content, sender = "user") {
   const wrapper = document.createElement("div");
   wrapper.classList.add("mb-6", "flex", "items-start", "space-x-3");
@@ -224,13 +291,26 @@ messageForm.addEventListener("submit", async (e) => {
   userInput.value = "";
   scrollToBottom();
 
+  // assistant 로딩 말풍선 추가
+  const loadingBubble = createLoadingBubble("assistant");
+  chatContainer.appendChild(loadingBubble);
+  scrollToBottom();
+
+
   try {
     const response = await getAssistantResponse(message);
     chatContainer.appendChild(createMessageBubble(response, "assistant"));
+    // 로딩 말풍선 제거
+    chatContainer.removeChild(loadingBubble);
+
+    // 실제 응답 말풍선 추가
     await saveMessage("assistant", response);
     scrollToBottom();
   } catch (error) {
     console.error("Error fetching assistant response:", error);
+    // 로딩 말풍선 제거
+    chatContainer.removeChild(loadingBubble);
+
     const errMsg = `Error fetching response. Check console.`;
     chatContainer.appendChild(createMessageBubble(errMsg, "assistant"));
     await saveMessage("assistant", errMsg);
