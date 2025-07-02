@@ -253,7 +253,7 @@ async function getAssistantResponse(userMessage) {
     ...allMsgs.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: userMessage },
   ];
-  const payload = { messages: messagesForAPI };
+  const payload = { message: userMessage };
   const url = `${BASE_URL}/chat`;
 
   const response = await fetch(url, {
@@ -270,13 +270,12 @@ async function getAssistantResponse(userMessage) {
 
   const data = await response.json();
 
-  if (mode === "assistant" && data.thread_id) {
-    const existingThreadId = await getMetadata("thread_id");
-    if (!existingThreadId) {
-      await saveMetadata("thread_id", data.thread_id);
-    }
-  }
-
+  // if (mode === "assistant" && data.thread_id) {
+  //   const existingThreadId = await getMetadata("thread_id");
+  //   if (!existingThreadId) {
+  //     await saveMetadata("thread_id", data.thread_id);
+  //   }
+  // }
   return data.reply;
 }
 
@@ -311,7 +310,7 @@ messageForm.addEventListener("submit", async (e) => {
     // 로딩 말풍선 제거
     chatContainer.removeChild(loadingBubble);
 
-    const errMsg = `Error fetching response. Check console.`;
+    const errMsg = `시스템 오류로 인해 응답할 수 없습니다. 잠시 후 다시 시도하세요.`;
     chatContainer.appendChild(createMessageBubble(errMsg, "assistant"));
     await saveMessage("assistant", errMsg);
     scrollToBottom();
