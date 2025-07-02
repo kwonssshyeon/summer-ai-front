@@ -3,9 +3,7 @@ import "regenerator-runtime/runtime"; // if needed for async/await in older brow
 const chatContainer = document.getElementById("chat-container");
 const messageForm = document.getElementById("message-form");
 const userInput = document.getElementById("user-input");
-const apiSelector = document.getElementById("api-selector");
 const newChatBtn = document.getElementById("new-chat-btn");
-
 const BASE_URL = process.env.API_ENDPOINT;
 
 let db;
@@ -86,6 +84,12 @@ function createMessageBubble(content, sender = "user") {
   const wrapper = document.createElement("div");
   wrapper.classList.add("mb-6", "flex", "items-start", "space-x-3");
 
+  if (sender === "user") {
+    wrapper.classList.add("justify-end");
+  } else {
+    wrapper.classList.add("justify-start");
+  }
+
   const avatar = document.createElement("div");
   avatar.classList.add(
     "w-10",
@@ -100,10 +104,10 @@ function createMessageBubble(content, sender = "user") {
   );
 
   if (sender === "assistant") {
-    avatar.classList.add("bg-gradient-to-br", "from-green-400", "to-green-600");
+    avatar.classList.add("bg-gradient-to-br", "from-[#14213D]", "to-[#14213D]");
     avatar.textContent = "A";
   } else {
-    avatar.classList.add("bg-gradient-to-br", "from-blue-500", "to-blue-700");
+    avatar.classList.add("bg-gradient-to-br", "from-[#FCA311]", "to-[#FCA311]");
     avatar.textContent = "U";
   }
 
@@ -119,15 +123,22 @@ function createMessageBubble(content, sender = "user") {
   );
 
   if (sender === "assistant") {
-    bubble.classList.add("bg-gray-200", "text-gray-900");
+    bubble.classList.add("bg-[#E5E5E5]", "text-[#000000]");
   } else {
-    bubble.classList.add("bg-blue-600", "text-white");
+    bubble.classList.add("bg-[#FCA311]", "text-[#FFFFFF]");
   }
 
   bubble.textContent = content;
 
-  wrapper.appendChild(avatar);
-  wrapper.appendChild(bubble);
+  if (sender === "assistant") {
+    // 왼쪽 정렬: 아바타 → 말풍선
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+  } else {
+    // 오른쪽 정렬: 말풍선 → 아바타
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(avatar);
+  }
   return wrapper;
 }
 
@@ -137,27 +148,15 @@ function scrollToBottom() {
 
 async function getAssistantResponse(userMessage) {
   const mode = apiSelector.value;
-  let url;
-  let payload;
 
-  if (mode === "assistant") {
-    const thread_id = await getMetadata("thread_id");
-    payload = { message: userMessage };
-    if (thread_id) {
-      payload.thread_id = thread_id;
-    }
-    url = `${BASE_URL}/assistant`;
-  } else {
-    // Naive mode
-    const allMsgs = await getAllMessages();
-    const messagesForAPI = [
-      { role: "system", content: "You are a helpful assistant." },
-      ...allMsgs.map((m) => ({ role: m.role, content: m.content })),
-      { role: "user", content: userMessage },
-    ];
-    payload = { messages: messagesForAPI };
-    url = `${BASE_URL}/chat`;
-  }
+  const allMsgs = await getAllMessages();
+  const messagesForAPI = [
+    { role: "system", content: "You are a helpful assistant." },
+    ...allMsgs.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user", content: userMessage },
+  ];
+  const payload = { messages: messagesForAPI };
+  const url = `${BASE_URL}/chat`;
 
   const response = await fetch(url, {
     method: "POST",
