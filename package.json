@@ -20,6 +20,7 @@
   },
   "homepage": "https://beomi.github.io/ssafy-2024-frontend/",
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "marked": "^16.0.0"
   }
 }

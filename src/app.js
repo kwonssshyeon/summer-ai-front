@@ -1,4 +1,5 @@
 import "regenerator-runtime/runtime"; // if needed for async/await in older browsers
+import { marked } from "marked";
 
 const chatContainer = document.getElementById("chat-container");
 const messageForm = document.getElementById("message-form");
@@ -7,6 +8,11 @@ const newChatBtn = document.getElementById("new-chat-btn");
 const BASE_URL = process.env.API_ENDPOINT;
 
 let db;
+marked.setOptions({
+  headerIds: true,   // 기본값 true
+  headerPrefix: '',  // 접두사 설정
+});
+
 
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -104,11 +110,31 @@ function createMessageBubble(content, sender = "user") {
   );
 
   if (sender === "assistant") {
-    avatar.classList.add("bg-gradient-to-br", "from-[#14213D]", "to-[#14213D]");
-    avatar.textContent = "A";
+    avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+    avatar.innerHTML = `
+    <svg width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="60" fill="#74C1A9"/>
+      <g fill="white" transform="translate(-17, 0) scale(1.3)">
+        <path d="M60 30c-16 0-28 12-28 26s12 26 28 26 28-12 28-26-12-26-28-26zm0 48c-12.15 0-22-8.28-22-18s9.85-18 22-18 22 8.28 22 18-9.85 18-22 18z"/>
+        <circle cx="50" cy="58" r="4"/>
+        <circle cx="70" cy="58" r="4"/>
+        <path d="M52 70c2.5 2.5 13.5 2.5 16 0" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="60" cy="18" r="6" fill="white"/>
+        <line x1="60" y1="24" x2="60" y2="34" stroke="white" stroke-width="4" stroke-linecap="round"/>
+      </g>
+    </svg>
+
+    `;
   } else {
-    avatar.classList.add("bg-gradient-to-br", "from-[#FCA311]", "to-[#FCA311]");
-    avatar.textContent = "U";
+    avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+    avatar.innerHTML = `
+    <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 22.01C17.5228 22.01 22 17.5329 22 12.01C22 6.48716 17.5228 2.01001 12 2.01001C6.47715 2.01001 2 6.48716 2 12.01C2 17.5329 6.47715 22.01 12 22.01Z" fill="#74C1A9"/>
+      <path d="M12 6.93994C9.93 6.93994 8.25 8.61994 8.25 10.6899C8.25 12.7199 9.84 14.3699 11.95 14.4299C11.98 14.4299 12.02 14.4299 12.04 14.4299C12.06 14.4299 12.09 14.4299 12.11 14.4299C12.12 14.4299 12.13 14.4299 12.13 14.4299C14.15 14.3599 15.74 12.7199 15.75 10.6899C15.75 8.61994 14.07 6.93994 12 6.93994Z" fill="#FFFFFF"/>
+      <path d="M18.7807 19.36C17.0007 21 14.6207 22.01 12.0007 22.01C9.3807 22.01 7.0007 21 5.2207 19.36C5.4607 18.45 6.1107 17.62 7.0607 16.98C9.7907 15.16 14.2307 15.16 16.9407 16.98C17.9007 17.62 18.5407 18.45 18.7807 19.36Z" fill="#FFFFFF"/>
+    </svg>
+
+    `;
   }
 
   const bubble = document.createElement("div");
@@ -123,12 +149,19 @@ function createMessageBubble(content, sender = "user") {
   );
 
   if (sender === "assistant") {
-    bubble.classList.add("bg-[#E5E5E5]", "text-[#000000]");
+    bubble.classList.add("bg-[#F2F2F2]", "text-[#5C5C5C]");
+    bubble.innerHTML = `<div class="prose" style="
+      display: inline-block;
+      max-width: 90vw;
+      width: fit-content;
+      white-space: normal;
+    ">
+    ${marked.parse(content)}
+    </div>`;  
   } else {
-    bubble.classList.add("bg-[#FCA311]", "text-[#FFFFFF]");
+    bubble.classList.add("bg-[#74C1A9]", "text-[#FFFFFF]");
+    bubble.textContent = content;
   }
-
-  bubble.textContent = content;
 
   if (sender === "assistant") {
     // 왼쪽 정렬: 아바타 → 말풍선
@@ -147,8 +180,6 @@ function scrollToBottom() {
 }
 
 async function getAssistantResponse(userMessage) {
-  const mode = apiSelector.value;
-
   const allMsgs = await getAllMessages();
   const messagesForAPI = [
     { role: "system", content: "You are a helpful assistant." },
@@ -200,7 +231,7 @@ messageForm.addEventListener("submit", async (e) => {
     scrollToBottom();
   } catch (error) {
     console.error("Error fetching assistant response:", error);
-    const errMsg = "Error fetching response. Check console.";
+    const errMsg = `Error fetching response. Check console.`;
     chatContainer.appendChild(createMessageBubble(errMsg, "assistant"));
     await saveMessage("assistant", errMsg);
     scrollToBottom();
