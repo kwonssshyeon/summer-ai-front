@@ -104,10 +104,10 @@ function createLoadingBubble(sender = "assistant") {
     "text-white"
   );
 
-  avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+  avatar.classList.add("bg-gradient-to-br", "from-[#7209b7]", "to-[#7209b7]");
   avatar.innerHTML = ` 
     <svg width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="60" fill="#74C1A9"/>
+      <circle cx="60" cy="60" r="60" fill="#7209b7"/>
       <g fill="white" transform="translate(-17, 0) scale(1.3)">
         <path d="M60 30c-16 0-28 12-28 26s12 26 28 26 28-12 28-26-12-26-28-26zm0 48c-12.15 0-22-8.28-22-18s9.85-18 22-18 22 8.28 22 18-9.85 18-22 18z"/>
         <circle cx="50" cy="58" r="4"/>
@@ -139,7 +139,7 @@ function createLoadingBubble(sender = "assistant") {
       width: 24px;
       height: 24px;
       border: 3px solid #ccc;
-      border-top-color: #74C1A9;
+      border-top-color: #7209b7;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto;
@@ -177,10 +177,10 @@ function createMessageBubble(content, sender = "user") {
   );
 
   if (sender === "assistant") {
-    avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+    avatar.classList.add("bg-gradient-to-br", "from-[#7209b7]", "to-[#7209b7]");
     avatar.innerHTML = `
     <svg width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="60" fill="#74C1A9"/>
+      <circle cx="60" cy="60" r="60" fill="#7209b7"/>
       <g fill="white" transform="translate(-17, 0) scale(1.3)">
         <path d="M60 30c-16 0-28 12-28 26s12 26 28 26 28-12 28-26-12-26-28-26zm0 48c-12.15 0-22-8.28-22-18s9.85-18 22-18 22 8.28 22 18-9.85 18-22 18z"/>
         <circle cx="50" cy="58" r="4"/>
@@ -193,10 +193,10 @@ function createMessageBubble(content, sender = "user") {
 
     `;
   } else {
-    avatar.classList.add("bg-gradient-to-br", "from-[#74C1A9]", "to-[#74C1A9]");
+    avatar.classList.add("bg-gradient-to-br", "from-[#7209b7]", "to-[#7209b7]");
     avatar.innerHTML = `
     <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 22.01C17.5228 22.01 22 17.5329 22 12.01C22 6.48716 17.5228 2.01001 12 2.01001C6.47715 2.01001 2 6.48716 2 12.01C2 17.5329 6.47715 22.01 12 22.01Z" fill="#74C1A9"/>
+      <path d="M12 22.01C17.5228 22.01 22 17.5329 22 12.01C22 6.48716 17.5228 2.01001 12 2.01001C6.47715 2.01001 2 6.48716 2 12.01C2 17.5329 6.47715 22.01 12 22.01Z" fill="#7209b7"/>
       <path d="M12 6.93994C9.93 6.93994 8.25 8.61994 8.25 10.6899C8.25 12.7199 9.84 14.3699 11.95 14.4299C11.98 14.4299 12.02 14.4299 12.04 14.4299C12.06 14.4299 12.09 14.4299 12.11 14.4299C12.12 14.4299 12.13 14.4299 12.13 14.4299C14.15 14.3599 15.74 12.7199 15.75 10.6899C15.75 8.61994 14.07 6.93994 12 6.93994Z" fill="#FFFFFF"/>
       <path d="M18.7807 19.36C17.0007 21 14.6207 22.01 12.0007 22.01C9.3807 22.01 7.0007 21 5.2207 19.36C5.4607 18.45 6.1107 17.62 7.0607 16.98C9.7907 15.16 14.2307 15.16 16.9407 16.98C17.9007 17.62 18.5407 18.45 18.7807 19.36Z" fill="#FFFFFF"/>
     </svg>
@@ -226,7 +226,12 @@ function createMessageBubble(content, sender = "user") {
     ${marked.parse(content)}
     </div>`;  
   } else {
-    bubble.classList.add("bg-[#74C1A9]", "text-[#FFFFFF]");
+    bubble.classList.add(
+  "text-white",
+    "bg-gradient-to-r",
+    "from-[#7209b7]",
+    "to-[#7209b7]",
+  );
     bubble.textContent = content;
   }
 
@@ -237,7 +242,7 @@ function createMessageBubble(content, sender = "user") {
   } else {
     // 오른쪽 정렬: 말풍선 → 아바타
     wrapper.appendChild(bubble);
-    wrapper.appendChild(avatar);
+    // wrapper.appendChild(avatar);
   }
   return wrapper;
 }
@@ -253,7 +258,7 @@ async function getAssistantResponse(userMessage) {
     ...allMsgs.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: userMessage },
   ];
-  const payload = { message: userMessage };
+  const payload = { message: messagesForAPI };
   const url = `${BASE_URL}/chat`;
 
   const response = await fetch(url, {
