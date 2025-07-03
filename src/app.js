@@ -56,28 +56,9 @@ async function getAllMessages() {
   });
 }
 
-async function saveMetadata(key, value) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("metadata", "readwrite");
-    const store = tx.objectStore("metadata");
-    store.put({ key, value });
-    tx.oncomplete = () => resolve();
-    tx.onerror = (e) => reject(e);
-  });
-}
-
-async function getMetadata(key) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("metadata", "readonly");
-    const store = tx.objectStore("metadata");
-    const req = store.get(key);
-    req.onsuccess = () => resolve(req.result ? req.result.value : null);
-    req.onerror = (e) => reject(e);
-  });
-}
-
 async function clearAllData() {
   return new Promise((resolve, reject) => {
+    localStorage.removeItem("session_id");
     const tx = db.transaction(["chats", "metadata"], "readwrite");
     tx.objectStore("chats").clear();
     tx.objectStore("metadata").clear();
@@ -337,6 +318,6 @@ newChatBtn.addEventListener("click", async () => {
   // Now user can start a new chat fresh
 });
 
-initDB().then(loadExistingMessages);
+initDB().then(clearAllData).then(loadExistingMessages);
 
 console.log(BASE_URL);
