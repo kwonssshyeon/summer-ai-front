@@ -253,12 +253,13 @@ function scrollToBottom() {
 
 async function getAssistantResponse(userMessage) {
   const allMsgs = await getAllMessages();
-  const messagesForAPI = [
-    { role: "system", content: "You are a helpful assistant." },
-    ...allMsgs.map((m) => ({ role: m.role, content: m.content })),
-    { role: "user", content: userMessage },
-  ];
-  const payload = { message: messagesForAPI };
+
+  // 로컬 스토리지에서 session_id 가져오기
+  const sessionId = localStorage.getItem("session_id");
+
+  const payload = { message: userMessage, 
+    ...(sessionId && { session_id: sessionId })
+   };
   const url = `${BASE_URL}/chat`;
 
   const response = await fetch(url, {
@@ -274,13 +275,12 @@ async function getAssistantResponse(userMessage) {
   }
 
   const data = await response.json();
+  
+  // 응답에 session_id가 있고 로컬스토리지에 저장 안 되어 있다면 저장
+  if (data.session_id && !sessionId) {
+    localStorage.setItem("session_id", data.session_id);
+  }
 
-  // if (mode === "assistant" && data.thread_id) {
-  //   const existingThreadId = await getMetadata("thread_id");
-  //   if (!existingThreadId) {
-  //     await saveMetadata("thread_id", data.thread_id);
-  //   }
-  // }
   return data.reply;
 }
 
